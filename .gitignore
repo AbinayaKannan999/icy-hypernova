@@ -1,0 +1,25 @@
+# Secrets - NEVER commit these
+.env
+backend/.env
+*.pem
+*.key
+
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Build outputs
+frontend/build/
+
+# Logs
+backend/logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE 
+.vscode/
+.idea/
