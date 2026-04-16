@@ -99,10 +99,13 @@ const MapPicker = ({ defaultPos, onLocationSelect }) => {
       },
       (err) => {
         setSearching(false);
-        if (err.code === 1) {
+        const isHTTP = window.location.protocol === 'http:' && window.location.hostname !== 'localhost';
+        if (isHTTP) {
+          toast.error('GPS requires HTTPS. Please drag the 📌 pin on the map to set your location.', { duration: 5000, id: 'mapLocate' });
+        } else if (err.code === 1) {
           toast.error('Location access denied. Please allow location in your browser settings.', { id: 'mapLocate' });
         } else {
-          toast.error('Could not get your location. Try dragging the pin manually.', { id: 'mapLocate' });
+          toast.error('Could not get location. Drag the 📌 pin to set it manually.', { id: 'mapLocate' });
         }
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }

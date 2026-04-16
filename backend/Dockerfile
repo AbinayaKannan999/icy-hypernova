@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 5000
 
 # Start command
-CMD sh -c "node src/database/migrate.js && node src/database/seed.js && node src/server.js"
+CMD sh -c "node src/database/migrate.js; node src/database/seed.js; node src/server.js"
