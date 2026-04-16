@@ -30,29 +30,6 @@ const RegisterPage = () => {
     }
   };
 
-  const handleGetLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error('Geolocation is not supported by your browser');
-      return;
-    }
-    setLoading(true);
-    toast.loading('Detecting live location...', { id: 'geoToast' });
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setForm(prev => ({ ...prev, latitude, longitude }));
-        toast.success('Live location detected!', { id: 'geoToast' });
-        setLoading(false);
-      },
-      (error) => {
-        toast.error('Failed to get location. Please allow permissions.', { id: 'geoToast' });
-        setLoading(false);
-      }
-    );
-  };
-
-  // Removed redundant useEffect. MapPicker now handles geocoding.
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.password) {

@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Search, MapPin, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 // fix for default marker icons in react-leaflet
@@ -86,21 +85,27 @@ const MapPicker = ({ defaultPos, onLocationSelect }) => {
 
   const handleLocateMe = () => {
     if (!navigator.geolocation) {
-      toast.error('Geolocation not supported');
+      toast.error('Geolocation not supported by your browser');
       return;
     }
     setSearching(true);
+    toast.loading('Finding your location…', { id: 'mapLocate' });
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const latlng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setPosition(latlng);
         setSearching(false);
-        toast.success('Located! Map centered on your position.');
+        toast.success('Located! Drag the pin to adjust.', { id: 'mapLocate' });
       },
-      () => {
+      (err) => {
         setSearching(false);
-        toast.error('Could not get your location. Please check browser permissions.');
-      }
+        if (err.code === 1) {
+          toast.error('Location access denied. Please allow location in your browser settings.', { id: 'mapLocate' });
+        } else {
+          toast.error('Could not get your location. Try dragging the pin manually.', { id: 'mapLocate' });
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -117,21 +122,27 @@ const MapPicker = ({ defaultPos, onLocationSelect }) => {
         <LocationMarker position={position} setPosition={setPosition} />
       </MapContainer>
 
-      <div style={{ position: 'absolute', bottom: '10px', right: '10px', zIndex: 1000, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-         <button 
-           type="button"
-           className="btn btn-secondary" 
-           style={{ width: '40px', height: '40px', padding: 0, borderRadius: '50%', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-           onClick={handleLocateMe}
-           title="Find my location"
-         >
-           {searching ? <Loader2 size={20} className="animate-spin" /> : <MapPin size={20} />}
-         </button>
-      </div>
+      {/* Locate Me Button */}
+      <button
+        type="button"
+        onClick={handleLocateMe}
+        disabled={searching}
+        style={{
+          position: 'absolute', top: '10px', right: '10px', zIndex: 1000,
+          background: 'white', border: '1px solid var(--gray-200)',
+          borderRadius: '10px', padding: '8px 14px',
+          fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer',
+          boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', gap: '6px',
+          color: searching ? 'var(--gray-400)' : 'var(--primary-700)'
+        }}
+        title="Use my current GPS location"
+      >
+        {searching ? '⏳ Finding…' : '📍 Use My Location'}
+      </button>
 
-      <div style={{ position: 'absolute', bottom: '10px', left: '10px', background: 'rgba(255,255,255,0.9)', padding: '6px 12px', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', zIndex: 1000, boxShadow: 'var(--shadow-sm)', color: 'var(--gray-600)' }}>
-        <MapPin size={12} style={{ marginRight: '4px', display: 'inline' }} />
-        {position.lat.toFixed(6)}, {position.lng.toFixed(6)}
+      {/* Coordinates Badge */}
+      <div style={{ position: 'absolute', bottom: '10px', left: '10px', background: 'rgba(255,255,255,0.9)', padding: '5px 10px', borderRadius: 'var(--radius-full)', fontSize: '0.72rem', zIndex: 1000, boxShadow: 'var(--shadow-sm)', color: 'var(--gray-500)', letterSpacing: '0.5px' }}>
+        📌 {position.lat.toFixed(5)}, {position.lng.toFixed(5)}
       </div>
     </div>
   );
