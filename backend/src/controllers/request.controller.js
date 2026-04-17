@@ -278,6 +278,25 @@ const updateRequestStatus = async (req, res, next) => {
       );
     }
 
+    // If in_transit, create/update delivery record so GPS tracking has a delivery_id
+    if (status === 'in_transit') {
+      const existingDelivery = await client.query(
+        'SELECT id FROM deliveries WHERE request_id = $1', [id]
+      );
+      if (existingDelivery.rows.length === 0) {
+        await client.query(
+          `INSERT INTO deliveries (request_id, receiver_id, status)
+           VALUES ($1, $2, 'in_transit')`,
+          [id, request.receiver_id]
+        );
+      } else {
+        await client.query(
+          `UPDATE deliveries SET status = 'in_transit', updated_at = NOW() WHERE request_id = $1`,
+          [id]
+        );
+      }
+    }
+
     await client.query('COMMIT');
 
     // Triple Notification Logic per Requirement
