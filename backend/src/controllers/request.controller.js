@@ -120,6 +120,15 @@ const createRequest = async (req, res, next) => {
       return res.status(409).json({ success: false, message: 'You already have an active request for this donation.' });
     }
 
+    // Generate QR code for this request
+    const qrPayload = JSON.stringify({ type: 'foodbridge_delivery', requestId: uuidv4(), donationId: donation_id, receiverId: req.user.id, ts: Date.now() });
+    let qrCode = null;
+    try {
+      qrCode = await QRCode.toDataURL(qrPayload);
+    } catch (qrErr) {
+      logger.error('QR generation failed (non-fatal):', qrErr.message);
+    }
+
     const result = await client.query(
       `INSERT INTO food_requests (
         donation_id, receiver_id, quantity_requested, delivery_address, delivery_city,
@@ -127,7 +136,7 @@ const createRequest = async (req, res, next) => {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *`,
       [
-        donation_id, req.user.id, quantity_requested, delivery_address, delivery_city,
+        donation_id, req.user.id, quantity_requested, delivery_address || null, delivery_city || null,
         delivery_latitude || null, delivery_longitude || null,
         beneficiary_count || 1, special_notes || null, urgency_level || 3, qrCode
       ]
