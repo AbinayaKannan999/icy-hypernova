@@ -246,10 +246,10 @@ const DonationsPage = () => {
                 <div className="grid grid-cols-2">
                   <div className="form-group">
                     <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      Pickup Address <span className="required">*</span>
+                      Pickup Address
                       <button type="button" onClick={() => handleGetLocation(false)} className="text-primary text-xs font-bold hover:underline bg-transparent border-none cursor-pointer flex items-center gap-1">📍 Get Live Location</button>
                     </label>
-                    <input className="form-control" value={form.pickup_address} onChange={e => setForm({...form, pickup_address: e.target.value})} required placeholder="123 Example Street" />
+                    <input className="form-control" value={form.pickup_address} onChange={e => setForm({...form, pickup_address: e.target.value})} placeholder="e.g. 12 Anna Nagar, Chennai (optional)" />
                   </div>
                   <div className="form-group">
                     <label className="form-label">District <span className="required">*</span></label>

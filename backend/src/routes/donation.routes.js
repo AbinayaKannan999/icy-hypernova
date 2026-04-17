@@ -9,12 +9,12 @@ router.get('/', authenticate, getDonations);
 router.get('/:id', authenticate, getDonationById);
 
 router.post('/', authenticate, authorize('donor', 'admin'), [
-  body('title').trim().isLength({ min: 3, max: 200 }).withMessage('Title must be 3-200 characters'),
+  body('title').trim().isLength({ min: 2, max: 200 }).withMessage('Title must be 2-200 characters'),
   body('food_type').isIn(['cooked_meals', 'raw_produce', 'packaged_food', 'beverages', 'dairy', 'bakery', 'other']).withMessage('Invalid food type'),
   body('quantity').isInt({ min: 1 }).withMessage('Quantity must be a positive integer'),
   body('condition').isIn(['excellent', 'good', 'fair', 'needs_immediate_use']).withMessage('Invalid condition'),
   body('expiry_time').isISO8601().withMessage('Valid expiry time required'),
-  body('pickup_address').trim().isLength({ min: 10 }).withMessage('Pickup address required (min 10 chars)'),
+  body('pickup_address').optional({ checkFalsy: true }).trim(),
   validate
 ], createDonation);
 
