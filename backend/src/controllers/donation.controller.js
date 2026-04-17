@@ -120,14 +120,26 @@ const createDonation = async (req, res, next) => {
         donor_id, title, description, food_type, quantity, quantity_remaining, quantity_unit, condition,
         preparation_time, expiry_time, pickup_address, pickup_city, pickup_latitude,
         pickup_longitude, special_instructions, allergen_info, is_vegetarian, serving_count
-      ) VALUES ($1, $2, $3, $4, $5, $18, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+      ) VALUES ($1, $2, $3, $4, $5, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       RETURNING *`,
       [
-        req.user.id, title, description, food_type, quantity, quantity_unit || 'servings',
-        condition, preparation_time || null, expiry_time, pickup_address, pickup_city,
-        pickup_latitude || null, pickup_longitude || null, special_instructions || null,
-        allergen_info || null, is_vegetarian !== false, serving_count || quantity,
-        quantity // This is $18
+        req.user.id,                          // $1 donor_id
+        title,                                // $2 title
+        description || null,                  // $3 description
+        food_type || 'other',                 // $4 food_type
+        quantity,                             // $5 quantity (also used for quantity_remaining)
+        quantity_unit || 'servings',          // $6 quantity_unit
+        condition || 'good',                  // $7 condition
+        preparation_time || null,             // $8 preparation_time
+        expiry_time,                          // $9 expiry_time
+        pickup_address || '',                 // $10 pickup_address
+        pickup_city || 'Chennai',             // $11 pickup_city
+        pickup_latitude || null,              // $12 pickup_latitude
+        pickup_longitude || null,             // $13 pickup_longitude
+        special_instructions || null,         // $14 special_instructions
+        allergen_info || null,                // $15 allergen_info
+        is_vegetarian !== false,              // $16 is_vegetarian
+        serving_count || quantity             // $17 serving_count
       ]
     );
 

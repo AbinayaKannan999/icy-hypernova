@@ -39,6 +39,11 @@ const DonationsPage = () => {
   useEffect(() => { fetchDonations(); }, [user.role]);
 
   const handleGetLocation = (isDelivery = false) => {
+    const isHTTP = window.location.protocol === 'http:' && window.location.hostname !== 'localhost';
+    if (isHTTP) {
+      toast.error('Live GPS requires HTTPS. Please type your address manually.', { duration: 4000 });
+      return;
+    }
     if (!navigator.geolocation) {
       return toast.error('Geolocation is not supported by your browser');
     }
@@ -54,31 +59,23 @@ const DonationsPage = () => {
         try {
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18`);
           const data = await res.json();
-          let addr = data.address;
+          const addr = data.address || {};
           let detectedCity = addr.county || addr.state_district || addr.city || 'Chennai';
           detectedCity = detectedCity.replace(' District', '');
-
-          // Detailed Street + Area address
-          const street = addr.road || addr.pedestrian || addr.building || '';
-          const area = addr.suburb || addr.neighbourhood || addr.village || addr.subdistrict || addr['sub-district'] || '';
+          const street = addr.road || addr.pedestrian || '';
+          const area = addr.suburb || addr.neighbourhood || '';
           const fullAddr = [street, area].filter(Boolean).join(', ');
-          
           if (isDelivery) {
-              setReqForm(prev => ({ ...prev, delivery_city: detectedCity, delivery_address: fullAddr }));
+            setReqForm(prev => ({ ...prev, delivery_city: detectedCity, delivery_address: fullAddr }));
           } else {
-              setForm(prev => ({ ...prev, pickup_city: detectedCity, pickup_address: fullAddr }));
+            setForm(prev => ({ ...prev, pickup_city: detectedCity, pickup_address: fullAddr }));
           }
-
-          if (TAMIL_NADU_DISTRICTS.includes(detectedCity)) {
-            toast.success(`Location: ${fullAddr || detectedCity}`, { id: 'geoToast' });
-          } else {
-            toast.success('Address auto-filled!', { id: 'geoToast' });
-          }
-        } catch (err) {
-          toast.success('Live coordinates saved!', { id: 'geoToast' });
+          toast.success(`Location: ${fullAddr || detectedCity}`, { id: 'geoToast' });
+        } catch {
+          toast.success('Coordinates saved!', { id: 'geoToast' });
         }
       },
-      () => toast.error('Failed to get location. Please allow permissions.', { id: 'geoToast' })
+      () => toast.error('Could not get location. Please type your address manually.', { id: 'geoToast' })
     );
   };
 
